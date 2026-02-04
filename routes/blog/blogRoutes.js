@@ -12,6 +12,7 @@ import {
   getAllBlogs,
   getBlogById,
   getBlogBySlug,
+  searchBlogsController,
   getRecentBlogs,
   updateBlogById,
 } from "../../controller/blog/blogController.js";
@@ -33,6 +34,8 @@ router
   .route("/")
   .post(upload.single("thumbImage"), createBlog) // Create a blog post
   .get(getAllBlogs); // Get all blog posts
+
+ router.route("/search").get(searchBlogsController);
 router.route("/recent").get(getRecentBlogs); // By default 5 recent blog will be fetched
  router.get("/slug/:slug", getBlogBySlug);
 router
