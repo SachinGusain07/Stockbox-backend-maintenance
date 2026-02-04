@@ -72,7 +72,7 @@ import { paginate } from "../../utils/ErrorResponse/Pagination.js";
         { path: "category", select: "blogCategoryName" },
       ],
       filter,
-      "-publishedAt" // Newest one come first Can also write as {publishedAt: -1}
+      // "-publishedAt" // Newest one come first Can also write as {publishedAt: -1}
     );
   
     // Check if no blogs found
@@ -205,3 +205,37 @@ export const getBlogBySlug = asyncHandler(async (req, res, next) => {
         new ApiResponse("Fetched recent blog posts successfully", recentBlogs)
       );
   });
+
+
+
+export const searchBlogsController = asyncHandler(async (req, res, next) => {
+  const page = parseInt(req.query.page || "1");
+  const limit = parseInt(req.query.limit || "10");
+  const query = req.query.q || "";
+
+  const filter = {
+    title: { $regex: query, $options: "i" }
+  };
+
+  const { data: blogs, pagination } = await paginate(
+    Bloging,
+    page,
+    limit,
+    [
+      { path: "author", select: "fullName" },
+      { path: "category", select: "blogCategoryName" },
+    ],
+    filter,
+    // "-publishedAt" // Newest first based on your schema timestamp
+  );
+
+  const data = {
+    data :blogs ,
+    metadata : pagination
+
+  }
+
+  return res.status(200).json(
+    new ApiResponse("Search results fetched", data)
+  );
+});
