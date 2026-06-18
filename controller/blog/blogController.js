@@ -72,7 +72,7 @@ import { paginate } from "../../utils/ErrorResponse/Pagination.js";
         { path: "category", select: "blogCategoryName" },
       ],
       filter,
-     {publishedAt: -1}
+   // use this for fetch new blog  {publishedAt: -1}
     );
   
     // Check if no blogs found
