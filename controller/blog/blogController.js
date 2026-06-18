@@ -72,7 +72,7 @@ import { paginate } from "../../utils/ErrorResponse/Pagination.js";
         { path: "category", select: "blogCategoryName" },
       ],
       filter,
-      { createdAt: -1 } // Newest one come first Can also write as {publishedAt: -1}
+     {publishedAt: -1}
     );
   
     // Check if no blogs found
