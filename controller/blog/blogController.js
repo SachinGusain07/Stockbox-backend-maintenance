@@ -557,70 +557,163 @@ export const getBlogsByCategory = asyncHandler(async (req, res, next) => {
     new ApiResponse("Blogs fetched successfully", blogs, pagination)
   );
 });
+
+
+// export const getSitemapXml = asyncHandler(async (req, res) => {
+//   const BASE_URL = "https://www.stockboxtech.com";
+
+//   const blogs = await Bloging.find({ status: "published" })
+//     .select("slug updatedAt publishedAt")
+//     .sort({ publishedAt: -1 });
+
+//   const staticRoutes = [
+//     "/",
+//     "/blogs",
+//     "/about-us",
+//     "/contact-us",
+//     "/expert-advice",
+//     "/portfolio-screener",
+//     "/readymade-stockbox",
+//     "/stock-screener",
+//     "/portfolio-hedger",
+//     "/fii-dii-investments",
+//     "/researchReport",
+//     "/commodity",
+//     "/stockideas",
+//     "/options",
+//     "/trading-mentorship-program",
+//     "/advance-training/training",
+//     "/Download",
+//     "/careers",
+//     "/media",
+//     "/partner-with-us",
+//     "/comapny-ipos",
+//     "/FAQ",
+//     "/privacy-policy",
+//     "/terms-conditions",
+//     "/regulatory-details",
+//     "/grievancepolicy",
+//     "/compliance-audit-status",
+//     "/Stock-Market-Tips-Provider–Stockboxtech",
+//     "/Expert-Share-Market-Consultant–StockboxTech-for-Smart-Investments",
+//     "/Investment-Strategies-in-Stock-Market-Expert-Tips-by-StockBoxTech",
+//     "/Stock-Advisory-Services-Expert-Stock-Market-Guidance-by-StockboxTech",
+//     "/Trusted-Stock-Advisory-Services-in-India-Stockboxtech-Experts",
+//     "/Trusted-SEBI-Registered-Intraday-Tips-Provider-in-India-StockBoxTech"
+//   ];
+
+//   let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+//   xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+
+//   // Static Pages
+//   staticRoutes.forEach((route) => {
+//     xml += `  <url>\n`;
+//     xml += `    <loc>${BASE_URL}${route}</loc>\n`;
+//     xml += `    <changefreq>weekly</changefreq>\n`;
+//     xml += `    <priority>${route === "/" ? "1.0" : "0.8"}</priority>\n`;
+//     xml += `  </url>\n`;
+//   });
+
+//   // Dynamic Blogs
+//   blogs.forEach((blog) => {
+//     const lastMod = new Date(blog.updatedAt || blog.publishedAt || Date.now()).toISOString();
+//     xml += `  <url>\n`;
+//     xml += `    <loc>${BASE_URL}/blogs/${blog.slug}</loc>\n`;
+//     xml += `    <lastmod>${lastMod}</lastmod>\n`;
+//     xml += `    <changefreq>daily</changefreq>\n`;
+//     xml += `    <priority>0.9</priority>\n`;
+//     xml += `  </url>\n`;
+//   });
+
+//   xml += `</urlset>`;
+
+//   res.header("Content-Type", "application/xml; charset=utf-8");
+//   return res.status(200).send(xml);
+// });
+
+
+
 export const getSitemapXml = asyncHandler(async (req, res) => {
   const BASE_URL = "https://www.stockboxtech.com";
 
-  const blogs = await Bloging.find({ status: "published" })
-    .select("slug updatedAt publishedAt")
-    .sort({ publishedAt: -1 });
+  // FIX: Fetch blogs WITHOUT strict status restriction first so they show up!
+  // This matches 'published' OR documents where status is missing/undefined
+  const blogs = await Bloging.find({
+    $or: [
+      { status: "published" },
+      { status: { $exists: false } },
+      { status: null }
+    ]
+  })
+    .select("slug updatedAt publishedAt createdAt")
+    .lean();
+
+  console.log(">>> [SITEMAP DEBUG] Blogs found in DB:", blogs.length);
+  if (blogs.length > 0) {
+    console.log(">>> [SITEMAP DEBUG] Sample slug:", blogs[0].slug);
+  }
 
   const staticRoutes = [
-    "/",
-    "/blogs",
-    "/about-us",
-    "/contact-us",
-    "/expert-advice",
-    "/portfolio-screener",
-    "/readymade-stockbox",
-    "/stock-screener",
-    "/portfolio-hedger",
-    "/fii-dii-investments",
-    "/researchReport",
-    "/commodity",
-    "/stockideas",
-    "/options",
-    "/trading-mentorship-program",
-    "/advance-training/training",
-    "/Download",
-    "/careers",
-    "/media",
-    "/partner-with-us",
-    "/comapny-ipos",
-    "/FAQ",
-    "/privacy-policy",
-    "/terms-conditions",
-    "/regulatory-details",
-    "/grievancepolicy",
-    "/compliance-audit-status",
-    "/Stock-Market-Tips-Provider–Stockboxtech",
-    "/Expert-Share-Market-Consultant–StockboxTech-for-Smart-Investments",
-    "/Investment-Strategies-in-Stock-Market-Expert-Tips-by-StockBoxTech",
-    "/Stock-Advisory-Services-Expert-Stock-Market-Guidance-by-StockboxTech",
-    "/Trusted-Stock-Advisory-Services-in-India-Stockboxtech-Experts",
-    "/Trusted-SEBI-Registered-Intraday-Tips-Provider-in-India-StockBoxTech"
+    { url: "/", changefreq: "daily", priority: "1.0" },
+    { url: "/blogs", changefreq: "daily", priority: "0.9" },
+    { url: "/about-us", changefreq: "monthly", priority: "0.8" },
+    { url: "/contact-us", changefreq: "monthly", priority: "0.7" },
+    { url: "/expert-advice", changefreq: "weekly", priority: "0.8" },
+    { url: "/portfolio-screener", changefreq: "weekly", priority: "0.8" },
+    { url: "/readymade-stockbox", changefreq: "weekly", priority: "0.8" },
+    { url: "/stock-screener", changefreq: "weekly", priority: "0.8" },
+    { url: "/portfolio-hedger", changefreq: "weekly", priority: "0.8" },
+    { url: "/fii-dii-investments", changefreq: "daily", priority: "0.8" },
+    { url: "/researchReport", changefreq: "daily", priority: "0.8" },
+    { url: "/commodity", changefreq: "weekly", priority: "0.7" },
+    { url: "/stockideas", changefreq: "daily", priority: "0.8" },
+    { url: "/options", changefreq: "weekly", priority: "0.7" },
+    { url: "/trading-mentorship-program", changefreq: "weekly", priority: "0.8" },
+    { url: "/advance-training/training", changefreq: "monthly", priority: "0.7" },
+    { url: "/Download", changefreq: "monthly", priority: "0.6" },
+    { url: "/careers", changefreq: "monthly", priority: "0.5" },
+    { url: "/media", changefreq: "monthly", priority: "0.6" },
+    { url: "/partner-with-us", changefreq: "monthly", priority: "0.6" },
+    { url: "/comapny-ipos", changefreq: "weekly", priority: "0.7" },
+    { url: "/FAQ", changefreq: "monthly", priority: "0.6" },
+    { url: "/privacy-policy", changefreq: "yearly", priority: "0.3" },
+    { url: "/terms-conditions", changefreq: "yearly", priority: "0.3" },
+    { url: "/regulatory-details", changefreq: "yearly", priority: "0.3" },
+    { url: "/grievancepolicy", changefreq: "yearly", priority: "0.3" },
+    { url: "/compliance-audit-status", changefreq: "yearly", priority: "0.3" },
+    { url: "/Stock-Market-Tips-Provider–Stockboxtech", changefreq: "weekly", priority: "0.8" },
+    { url: "/Expert-Share-Market-Consultant–StockboxTech-for-Smart-Investments", changefreq: "weekly", priority: "0.8" },
+    { url: "/Investment-Strategies-in-Stock-Market-Expert-Tips-by-StockBoxTech", changefreq: "weekly", priority: "0.8" },
+    { url: "/Stock-Advisory-Services-Expert-Stock-Market-Guidance-by-StockboxTech", changefreq: "weekly", priority: "0.8" },
+    { url: "/Trusted-Stock-Advisory-Services-in-India-Stockboxtech-Experts", changefreq: "weekly", priority: "0.8" },
+    { url: "/Trusted-SEBI-Registered-Intraday-Tips-Provider-in-India-StockBoxTech", changefreq: "weekly", priority: "0.8" },
   ];
 
   let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
   xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
 
-  // Static Pages
+  // 1. Static URLs
   staticRoutes.forEach((route) => {
     xml += `  <url>\n`;
-    xml += `    <loc>${BASE_URL}${route}</loc>\n`;
-    xml += `    <changefreq>weekly</changefreq>\n`;
-    xml += `    <priority>${route === "/" ? "1.0" : "0.8"}</priority>\n`;
+    xml += `    <loc>${BASE_URL}${route.url}</loc>\n`;
+    xml += `    <changefreq>${route.changefreq}</changefreq>\n`;
+    xml += `    <priority>${route.priority}</priority>\n`;
     xml += `  </url>\n`;
   });
 
-  // Dynamic Blogs
+  // 2. Dynamic Blog URLs
   blogs.forEach((blog) => {
-    const lastMod = new Date(blog.updatedAt || blog.publishedAt || Date.now()).toISOString();
-    xml += `  <url>\n`;
-    xml += `    <loc>${BASE_URL}/blogs/${blog.slug}</loc>\n`;
-    xml += `    <lastmod>${lastMod}</lastmod>\n`;
-    xml += `    <changefreq>daily</changefreq>\n`;
-    xml += `    <priority>0.9</priority>\n`;
-    xml += `  </url>\n`;
+    if (blog.slug) {
+      const dateVal = blog.publishedAt || blog.updatedAt || blog.createdAt || new Date();
+      const lastMod = new Date(dateVal).toISOString();
+
+      xml += `  <url>\n`;
+      xml += `    <loc>${BASE_URL}/blog/${blog.slug}</loc>\n`;
+      xml += `    <lastmod>${lastMod}</lastmod>\n`;
+      xml += `    <changefreq>daily</changefreq>\n`;
+      xml += `    <priority>0.9</priority>\n`;
+      xml += `  </url>\n`;
+    }
   });
 
   xml += `</urlset>`;
@@ -628,4 +721,3 @@ export const getSitemapXml = asyncHandler(async (req, res) => {
   res.header("Content-Type", "application/xml; charset=utf-8");
   return res.status(200).send(xml);
 });
-
