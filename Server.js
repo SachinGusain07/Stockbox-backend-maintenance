@@ -25,6 +25,7 @@ import EmployeeRoute from "./routes/EmployeeRoute.js";
 import Issuerouter from "./routes/issueRoutes.js";
 import complaintReportRoutes from "./routes/complaintReport.Routes.js";
 import advanceRouter from "./controller/advance-training/advanceTraining.route.js"
+import { getSitemapXml } from "./controller/blog/blogController.js";
 
 dotenv.config();
 
@@ -55,6 +56,8 @@ app.use("/uploads", express.static(path.join(path.resolve(), "uploads")));
 
 // Routes
 app.use("/api/blogs", router); // blogs
+app.get("/sitemap.xml", getSitemapXml);
+
 app.use("/api", blogRoute); // review table
 app.use("/api/sec", UserRoute); //login, signup, logout
 app.use("/api/crousal", imgRouter); //hero image

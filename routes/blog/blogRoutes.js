@@ -15,6 +15,9 @@ import {
   searchBlogsController,
   getRecentBlogs,
   updateBlogById,
+  getBlogsByCategory,
+  getSitemapData,
+  getSitemapXml,
 } from "../../controller/blog/blogController.js";
 import { upload } from "../../middleware/multerMiddleware.js";
 import Bloging from "../../models/blog/blog.js";
@@ -47,15 +50,19 @@ router
  
   
 
-router.get("/categories/:categoryId/blogs", async (req, res) => {
-  const { categoryId } = req.params;
+ router.get("/categories/:categoryId/blogs",getBlogsByCategory )
 
-  try {
-    const blogs = await Bloging.find({ category: categoryId }).populate("category", "blogCategoryName");
-    res.status(200).json({ message: "Blogs fetched successfully", data: blogs });
-  } catch (error) {
-    res.status(500).json({ message: "Failed to fetch blogs", error: error.message });
-  }
-});
+
+ router.get("/blog/sitemap" , getSitemapData)
+//  async (req, res) => {
+//   const { categoryId } = req.params;
+
+//   try {
+//     const blogs = await Bloging.find({ category: categoryId }).populate("category", "blogCategoryName");
+//     res.status(200).json({ message: "Blogs fetched successfully", data: blogs });
+//   } catch (error) {
+//     res.status(500).json({ message: "Failed to fetch blogs", error: error.message });
+//   }
+// });
 
 export default router;
